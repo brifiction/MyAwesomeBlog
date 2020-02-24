@@ -1,0 +1,45 @@
+version: '3.4'
+
+services:
+  myawesomeblog:
+    image: ${DOCKER_REGISTRY-}myawesomeblog
+    container_name: ${DOCKER_REGISTRY-}myawesomeblog
+    build:
+      context: .\MyAwesomeBlog
+      dockerfile: Dockerfile
+    ports:
+      - "8888:80"
+    depends_on:
+      - mssql
+    networks:
+      - netmvc-network
+
+  mssql:
+    image: microsoft/mssql-server-windows-developer
+    container_name: mssql
+    build:
+      context: .\MyAwesomeBlog\.docker\mssql
+      dockerfile: Dockerfile
+    environment:
+      SERVICE_NAME: mssql
+      SERVICE_TAGS: dev
+      SA_PASSWORD: "myAwes0mePassword"
+      ACCEPT_EULA: "Y"
+      MSSQL_AGENT_ENABLED: "true"
+    volumes:
+      - db-data:C:\data
+    ports:
+      - "1433:1433"
+    networks:
+      - netmvc-network
+
+#Docker Networks
+networks:
+ netmvc-network:
+   external:
+     name: nat
+
+#Volumes
+volumes:
+  db-data:
+    driver: local
